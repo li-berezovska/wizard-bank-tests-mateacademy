@@ -1,5 +1,8 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { faker } from '@faker-js/faker';
+import { BankManagerMainPage } from '../../../src/pages/manager/BankManagerMainPage';
+import { AddCustomerPage } from '../../../src/pages/manager/AddCustomerPage';
+import { CustomersListPage } from '../../../src/pages/manager/CustomersListPage';
 
 test('Assert manager can add new customer', async ({ page }) => {
   /* 
@@ -12,6 +15,7 @@ test('Assert manager can add new customer', async ({ page }) => {
   5. Click [Add Customer].
   6. Reload the page (This is a simplified step to close the popup)
   7. Click [Customers] button.
+  
   8. Assert the customer First Name is present in the table in the last row. 
   9. Assert the customer Last Name is present in the table in the last row. 
   10. Assert the customer Postal Code is present in the table in the last row. 
@@ -26,4 +30,33 @@ test('Assert manager can add new customer', async ({ page }) => {
   2. Do not rely on the customer row id for the steps 8-11. 
     Use the ".last()" locator to get the last row.
   */
+
+  const bankManagerPage = new BankManagerMainPage(page);
+  const addCustomerPage = new AddCustomerPage(page);
+  const customersListPage = new CustomersListPage(page);
+
+ 
+  const firstName = faker.person.firstName();
+  const lastName = faker.person.lastName();
+  const postCode = faker.location.zipCode();
+
+  await addCustomerPage.open();
+  
+  await addCustomerPage.fillFirstName(firstName);
+  await addCustomerPage.fillLastName(lastName);
+  await addCustomerPage.fillPostCode(postCode);
+  await addCustomerPage.clickAddCustomer();
+
+
+  await page.reload();
+
+  await bankManagerPage.clickCustomers();
+
+  const lastRow = customersListPage.getLastRow();
+  const customerData = await customersListPage.getCustomerDataFromRow(lastRow);
+  expect(customerData.firstName).toBe(firstName);
+  expect(customerData.lastName).toBe(lastName);
+  expect(customerData.postCode).toBe(postCode);
+  expect(customerData.accountNumber).toBe('');
+  
 });
