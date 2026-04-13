@@ -25,3 +25,4 @@ test('Assert manager can Login', async ({ page }) => {
   await expect(bankManagerMainPage.openAccountButton).toBeVisible();
   await expect(bankManagerMainPage.customersButton).toBeVisible();
 });
+
